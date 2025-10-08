@@ -1,24 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { shallow } from 'zustand/shallow';
 import { useChatStore } from '../store/chat';
 import { Plus, Search, Pin, Trash2, Edit2 } from 'lucide-react';
 import { formatTokens } from '../lib/tokenEstimate';
 
 export function Sidebar() {
-  const {
-    sessions,
-    currentSessionId,
-    createSession,
-    setCurrentSession,
-    deleteSession,
-    renameSession,
-    togglePinSession,
-    sidebarOpen,
-  } = useChatStore();
+  const sessions = useChatStore(state => state.sessions, shallow);
+  const currentSessionId = useChatStore(state => state.currentSessionId);
+  const createSession = useChatStore(state => state.createSession);
+  const setCurrentSession = useChatStore(state => state.setCurrentSession);
+  const deleteSession = useChatStore(state => state.deleteSession);
+  const renameSession = useChatStore(state => state.renameSession);
+  const togglePinSession = useChatStore(state => state.togglePinSession);
+  const sidebarOpen = useChatStore(state => state.sidebarOpen);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState('');
+  const [editingInitialName, setEditingInitialName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingId]);
 
   if (!sidebarOpen) return null;
 
@@ -40,20 +46,27 @@ export function Sidebar() {
   const handleStartEdit = (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingId(id);
-    setEditingName(name);
+    setEditingInitialName(name);
   };
 
-  const handleSaveEdit = (id: string) => {
-    if (editingName.trim() && editingName.trim() !== sessions.find(s => s.id === id)?.name) {
-      renameSession(id, editingName.trim());
+  const handleSaveEdit = (id: string, nextName?: string) => {
+    const rawValue = nextName ?? inputRef.current?.value ?? editingInitialName;
+    const trimmed = rawValue.trim();
+    const currentName = sessions.find(s => s.id === id)?.name;
+
+    if (trimmed && trimmed !== currentName) {
+      renameSession(id, trimmed);
     }
     setEditingId(null);
-    setEditingName('');
+    setEditingInitialName('');
   };
 
   const handleCancelEdit = () => {
+    if (inputRef.current) {
+      inputRef.current.value = editingInitialName;
+    }
     setEditingId(null);
-    setEditingName('');
+    setEditingInitialName('');
   };
 
   const SessionGroup = ({
@@ -87,15 +100,15 @@ export function Sidebar() {
             >
               {editingId === session.id ? (
                 <input
+                  key={session.id}
                   ref={inputRef}
                   type="text"
-                  value={editingName}
-                  onChange={e => setEditingName(e.target.value)}
-                  onBlur={() => handleSaveEdit(session.id)}
+                  defaultValue={editingInitialName}
+                  onBlur={e => handleSaveEdit(session.id, e.currentTarget.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleSaveEdit(session.id);
+                      handleSaveEdit(session.id, (e.target as HTMLInputElement).value);
                     }
                     if (e.key === 'Escape') {
                       e.preventDefault();
