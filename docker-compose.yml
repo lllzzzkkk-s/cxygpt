@@ -1,0 +1,154 @@
+# ================================
+# CxyGPT Docker Compose 配置
+# ================================
+version: '3.8'
+
+services:
+  # ========================
+  # API Gateway (FastAPI)
+  # ========================
+  api-gateway:
+    build:
+      context: ./apps/api-gateway
+      dockerfile: Dockerfile
+    container_name: cxygpt-gateway
+    ports:
+      - "8001:8001"
+    environment:
+      - SINGLE_USER=${SINGLE_USER:-1}
+      - FORCE_PROFILE=${FORCE_PROFILE:-SINGLE_32G}
+      - UPSTREAM_OPENAI_BASE=${UPSTREAM_OPENAI_BASE:-http://vllm:8000}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-qwen3-14b}
+      - USE_MOCK=${USE_MOCK:-0}
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_PORT=8001
+      - DATABASE_URL=mysql+aiomysql://cxygpt:cxygpt123@mysql:3306/cxygpt?charset=utf8mb4
+    volumes:
+      - ./apps/api-gateway:/app
+      - ./configs:/configs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - cxygpt-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ========================
+  # Web Frontend (React)
+  # ========================
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: cxygpt-web
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_GATEWAY_URL=http://localhost:8001
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    networks:
+      - cxygpt-network
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+
+  # ========================
+  # MySQL Database
+  # ========================
+  mysql:
+    image: mysql:8.0
+    container_name: cxygpt-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=cxygpt
+      - MYSQL_USER=cxygpt
+      - MYSQL_PASSWORD=cxygpt123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - cxygpt-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================
+  # Redis (Cache & Queue)
+  # ========================
+  redis:
+    image: redis:7-alpine
+    container_name: cxygpt-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - cxygpt-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ========================
+  # vLLM (可选，需要 GPU)
+  # ========================
+  # vllm:
+  #   image: vllm/vllm-openai:latest
+  #   container_name: cxygpt-vllm
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - MODEL_NAME=qwen3-14b
+  #   volumes:
+  #     - ${MODELS_PATH}:/models
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   networks:
+  #     - cxygpt-network
+  #   restart: unless-stopped
+
+  # ========================
+  # Nginx (反向代理，可选)
+  # ========================
+  nginx:
+    image: nginx:alpine
+    container_name: cxygpt-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./infra/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api-gateway
+      - web
+    networks:
+      - cxygpt-network
+    restart: unless-stopped
+
+networks:
+  cxygpt-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:

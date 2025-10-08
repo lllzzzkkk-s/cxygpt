@@ -1,0 +1,9 @@
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2
+ruff==0.7.1
+black==24.10.0
+pre-commit>=3.6.0
+mypy>=1.13.0
+commitizen>=4.1.0
+detect-secrets>=1.5.0

@@ -1,0 +1,137 @@
+# ========================
+# 显存分档配置
+# ========================
+# 根据显存大小和使用场景，自动或手动选择合适的配置档位
+
+profiles:
+  # ===== 单人家用模式（RTX 5090 32GB，全精度）=====
+  SINGLE_32G:
+    description: "单人家用，质量优先，全精度 bfloat16"
+    gpu_memory_gb: 32
+    mode: single_user
+
+    vllm:
+      dtype: bfloat16
+      kv_cache_dtype: fp8
+      max_model_len: 3072
+      gpu_memory_utilization: 0.95
+      swap_space: 16
+      tensor_parallel_size: 1
+
+    gateway:
+      MAX_INPUT_TOKENS: 3072
+      MAX_OUTPUT_TOKENS: 512
+      RATE_QPS: 0              # 不限流
+      RATE_TPM: 0
+      QUEUE_SIZE: 1            # 单人模式，几乎不排队
+      TIMEOUT_FIRST_TOKEN: 20
+      TIMEOUT_TOTAL: 120
+
+  # ===== 开发/并发模拟模式（RTX 5090 32GB，4bit 量化）=====
+  DEV_32G:
+    description: "并发模拟，4bit 量化，保护延迟与吞吐"
+    gpu_memory_gb: 32
+    mode: multi_user
+
+    vllm:
+      dtype: auto              # 使用量化模型（GPTQ/AWQ 4bit）
+      kv_cache_dtype: fp8
+      max_model_len: 4096
+      gpu_memory_utilization: 0.92
+      swap_space: 16
+      tensor_parallel_size: 1
+
+    gateway:
+      MAX_INPUT_TOKENS: 2048
+      MAX_OUTPUT_TOKENS: 256
+      RATE_QPS: 2
+      RATE_TPM: 4000
+      QUEUE_SIZE: 64
+      TIMEOUT_FIRST_TOKEN: 10
+      TIMEOUT_TOTAL: 60
+
+  # ===== 服务器 48GB =====
+  SRV_48G:
+    description: "服务器 48GB 显存，更长上下文"
+    gpu_memory_gb: 48
+    mode: multi_user
+
+    vllm:
+      dtype: bfloat16
+      kv_cache_dtype: fp8
+      max_model_len: 8192
+      gpu_memory_utilization: 0.92
+      swap_space: 16
+      tensor_parallel_size: 1
+
+    gateway:
+      MAX_INPUT_TOKENS: 4096
+      MAX_OUTPUT_TOKENS: 512
+      RATE_QPS: 3
+      RATE_TPM: 6000
+      QUEUE_SIZE: 96
+      TIMEOUT_FIRST_TOKEN: 10
+      TIMEOUT_TOTAL: 60
+
+  # ===== 服务器 80GB =====
+  SRV_80G:
+    description: "服务器 80GB 显存，超长上下文"
+    gpu_memory_gb: 80
+    mode: multi_user
+
+    vllm:
+      dtype: bfloat16
+      kv_cache_dtype: fp8
+      max_model_len: 16384
+      gpu_memory_utilization: 0.92
+      swap_space: 32
+      tensor_parallel_size: 1
+
+    gateway:
+      MAX_INPUT_TOKENS: 4096
+      MAX_OUTPUT_TOKENS: 512
+      RATE_QPS: 5
+      RATE_TPM: 10000
+      QUEUE_SIZE: 128
+      TIMEOUT_FIRST_TOKEN: 10
+      TIMEOUT_TOTAL: 90
+
+  # ===== 多卡服务器（2x80GB 或更多）=====
+  SRV_MULTI_80G:
+    description: "多卡服务器，张量并行"
+    gpu_memory_gb: 160
+    mode: multi_user
+
+    vllm:
+      dtype: bfloat16
+      kv_cache_dtype: fp8
+      max_model_len: 16384
+      gpu_memory_utilization: 0.92
+      swap_space: 32
+      tensor_parallel_size: 2  # 双卡张量并行
+
+    gateway:
+      MAX_INPUT_TOKENS: 4096
+      MAX_OUTPUT_TOKENS: 512
+      RATE_QPS: 5
+      RATE_TPM: 10000
+      QUEUE_SIZE: 128
+      TIMEOUT_FIRST_TOKEN: 10
+      TIMEOUT_TOTAL: 90
+
+# ===== 自动检测规则 =====
+# 根据检测到的显存大小，自动匹配档位
+auto_detect_rules:
+  - gpu_memory_range: [30, 34]
+    default_profile: SINGLE_32G
+    note: "检测到 32GB 显存，默认单人模式。可通过 SINGLE_USER=0 切换到 DEV_32G"
+
+  - gpu_memory_range: [46, 50]
+    default_profile: SRV_48G
+
+  - gpu_memory_range: [78, 82]
+    default_profile: SRV_80G
+
+  - gpu_memory_range: [140, 999]
+    default_profile: SRV_MULTI_80G
+    note: "多卡环境，需手动配置 tensor_parallel_size"
