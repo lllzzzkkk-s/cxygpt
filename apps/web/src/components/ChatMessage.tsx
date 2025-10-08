@@ -51,7 +51,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {message.error ? (
             <div className="text-red-600 dark:text-red-400 text-sm">❌ {message.error}</div>
           ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+            <div className="prose prose-sm dark:prose-invert max-w-none text-gray-900 dark:text-gray-100">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{

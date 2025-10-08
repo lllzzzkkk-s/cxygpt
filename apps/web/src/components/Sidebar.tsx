@@ -74,18 +74,23 @@ export function Sidebar() {
               onClick={() => setCurrentSession(session.id)}
             >
               {editingId === session.id ? (
-                <input
-                  type="text"
-                  value={editingName}
-                  onChange={e => setEditingName(e.target.value)}
-                  onBlur={() => handleSaveEdit(session.id)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleSaveEdit(session.id);
-                    if (e.key === 'Escape') setEditingId(null);
-                  }}
-                  className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-blue-500 dark:border-blue-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editingName}
+                    onChange={e => setEditingName(e.target.value)}
+                    onBlur={() => handleSaveEdit(session.id)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handleSaveEdit(session.id);
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    className="flex-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-blue-500 dark:border-blue-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                    Enter 保存
+                  </span>
+                </div>
               ) : (
                 <>
                   <div className="flex items-center justify-between pr-20">
