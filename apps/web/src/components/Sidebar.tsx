@@ -83,15 +83,17 @@ export function Sidebar() {
                     if (e.key === 'Enter') handleSaveEdit(session.id);
                     if (e.key === 'Escape') setEditingId(null);
                   }}
-                  className="w-full bg-white dark:bg-gray-700 border border-blue-500 rounded px-2 py-1 text-sm"
+                  className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-blue-500 dark:border-blue-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
               ) : (
                 <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium truncate flex-1">{session.name}</span>
+                  <div className="flex items-center justify-between pr-20">
+                    <span className="text-sm font-medium truncate flex-1 text-gray-900 dark:text-gray-100">
+                      {session.name}
+                    </span>
                     {session.pinned && (
-                      <Pin className="w-3 h-3 text-blue-600 dark:text-blue-400 fill-current" />
+                      <Pin className="w-3 h-3 text-blue-600 dark:text-blue-400 fill-current flex-shrink-0 ml-2" />
                     )}
                   </div>
 
@@ -100,13 +102,13 @@ export function Sidebar() {
                     {session.totalTokens ? formatTokens(session.totalTokens) : '0'} tokens
                   </div>
 
-                  <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1">
+                  <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                     <button
                       onClick={e => {
                         e.stopPropagation();
                         togglePinSession(session.id);
                       }}
-                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-600 dark:text-gray-300"
                       title={session.pinned ? '取消固定' : '固定'}
                     >
                       <Pin className={`w-3 h-3 ${session.pinned ? 'fill-current' : ''}`} />
@@ -116,7 +118,7 @@ export function Sidebar() {
                         e.stopPropagation();
                         handleStartEdit(session.id, session.name);
                       }}
-                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-600 dark:text-gray-300"
                       title="重命名"
                     >
                       <Edit2 className="w-3 h-3" />
@@ -128,7 +130,7 @@ export function Sidebar() {
                           deleteSession(session.id);
                         }
                       }}
-                      className="p-1 hover:bg-red-200 dark:hover:bg-red-900/50 rounded text-red-600"
+                      className="p-1 hover:bg-red-200 dark:hover:bg-red-900/50 rounded text-red-600 dark:text-red-400"
                       title="删除"
                     >
                       <Trash2 className="w-3 h-3" />

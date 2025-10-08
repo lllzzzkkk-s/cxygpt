@@ -67,7 +67,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   }) => {
                     if (inline) {
                       return (
-                        <code className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">
+                        <code className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded text-sm font-mono">
                           {children}
                         </code>
                       );
@@ -88,7 +88,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
         <button
           onClick={handleCopy}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
           title="复制"
         >
           {copied ? (

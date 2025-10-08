@@ -62,7 +62,7 @@ export function ChatComposer({ onSend, onStop, disabled }: ChatComposerProps) {
               isStreaming ? '正在生成回复...' : '输入消息...（Enter 发送，Shift+Enter 换行）'
             }
             disabled={disabled || isStreaming}
-            className="flex-1 resize-none rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 min-h-[52px] max-h-[200px]"
+            className="flex-1 resize-none rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 min-h-[52px] max-h-[200px] placeholder:text-gray-400 dark:placeholder:text-gray-500"
             rows={1}
           />
 
