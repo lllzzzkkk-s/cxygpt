@@ -42,10 +42,16 @@ export function Sidebar() {
   };
 
   const handleSaveEdit = (id: string) => {
-    if (editingName.trim()) {
+    if (editingName.trim() && editingName.trim() !== sessions.find(s => s.id === id)?.name) {
       renameSession(id, editingName.trim());
     }
     setEditingId(null);
+    setEditingName('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingName('');
   };
 
   const SessionGroup = ({
@@ -78,11 +84,21 @@ export function Sidebar() {
                   type="text"
                   value={editingName}
                   onChange={e => setEditingName(e.target.value)}
-                  onBlur={() => handleSaveEdit(session.id)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleSaveEdit(session.id);
-                    if (e.key === 'Escape') setEditingId(null);
+                  onBlur={() => {
+                    // 延迟执行，避免与 onClick 冲突
+                    setTimeout(() => handleSaveEdit(session.id), 100);
                   }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSaveEdit(session.id);
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault();
+                      handleCancelEdit();
+                    }
+                  }}
+                  onClick={e => e.stopPropagation()}
                   className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-blue-500 dark:border-blue-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
