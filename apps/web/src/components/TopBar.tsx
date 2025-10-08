@@ -20,7 +20,7 @@ export function TopBar() {
       <div className="flex items-center gap-3">
         <button
           onClick={toggleSidebar}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
           title="切换侧边栏"
         >
           <Menu className="w-5 h-5" />

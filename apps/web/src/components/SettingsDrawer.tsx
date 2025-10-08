@@ -28,10 +28,10 @@ export function SettingsDrawer() {
       {/* 抽屉 */}
       <div className="fixed right-0 top-0 bottom-0 w-96 bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold">设置</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">设置</h2>
           <button
             onClick={toggleSettingsDrawer}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -41,8 +41,10 @@ export function SettingsDrawer() {
           {/* 当前档位 */}
           {limits && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div className="text-sm font-semibold mb-2">当前档位</div>
-              <div className="text-xs space-y-1 text-gray-600 dark:text-gray-400">
+              <div className="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">
+                当前档位
+              </div>
+              <div className="text-xs space-y-1 text-gray-600 dark:text-gray-300">
                 <div>模式：{limits.single_user ? '单人模式' : '多人模式'}</div>
                 <div>档位：{limits.profile}</div>
                 <div>输入限制：{limits.max_input_tokens} tokens</div>
@@ -55,7 +57,7 @@ export function SettingsDrawer() {
 
           {/* Temperature */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               Temperature：{settings.temperature.toFixed(2)}
             </label>
             <input
@@ -67,12 +69,14 @@ export function SettingsDrawer() {
               onChange={e => updateSettings({ temperature: parseFloat(e.target.value) })}
               className="w-full"
             />
-            <div className="text-xs text-gray-500 mt-1">控制输出的随机性（0=确定性，2=高随机）</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              控制输出的随机性（0=确定性，2=高随机）
+            </div>
           </div>
 
           {/* Top P */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               Top P：{settings.top_p.toFixed(2)}
             </label>
             <input
@@ -84,12 +88,12 @@ export function SettingsDrawer() {
               onChange={e => updateSettings({ top_p: parseFloat(e.target.value) })}
               className="w-full"
             />
-            <div className="text-xs text-gray-500 mt-1">核采样概率阈值</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">核采样概率阈值</div>
           </div>
 
           {/* Max Tokens */}
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               Max Tokens：{settings.max_tokens}
             </label>
             <input
@@ -101,18 +105,20 @@ export function SettingsDrawer() {
               onChange={e => updateSettings({ max_tokens: parseInt(e.target.value) })}
               className="w-full"
             />
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               最大输出 token 数（上限：{limits?.max_output_tokens || 512}）
             </div>
           </div>
 
           {/* 系统提示 */}
           <div>
-            <label className="block text-sm font-medium mb-2">系统提示模板</label>
+            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+              系统提示模板
+            </label>
             <select
               value={settings.systemPrompt}
               onChange={e => handleTemplateChange(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
             >
               {SYSTEM_PROMPT_TEMPLATES.map(t => (
                 <option key={t.label} value={t.value}>
@@ -126,15 +132,15 @@ export function SettingsDrawer() {
               onChange={e => updateSettings({ systemPrompt: e.target.value })}
               placeholder="自定义系统提示..."
               rows={4}
-              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
             />
           </div>
 
           {/* 长文分析开关 */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-medium">长文分析</div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">长文分析</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 启用更长的上下文窗口（多人模式降级时禁用）
               </div>
             </div>
@@ -163,7 +169,7 @@ export function SettingsDrawer() {
                 enableLongDoc: true,
               });
             }}
-            className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm font-medium"
+            className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm font-medium text-gray-900 dark:text-gray-100"
           >
             恢复默认设置
           </button>
