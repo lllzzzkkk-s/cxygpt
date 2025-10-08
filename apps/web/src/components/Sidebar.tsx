@@ -77,7 +77,11 @@ export function Sidebar() {
                   ? 'bg-blue-100 dark:bg-blue-900/30'
                   : 'hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
-              onClick={() => setCurrentSession(session.id)}
+              onClick={() => {
+                if (editingId !== session.id) {
+                  setCurrentSession(session.id);
+                }
+              }}
             >
               {editingId === session.id ? (
                 <input
@@ -98,7 +102,6 @@ export function Sidebar() {
                       handleCancelEdit();
                     }
                   }}
-                  onClick={e => e.stopPropagation()}
                   className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-blue-500 dark:border-blue-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
