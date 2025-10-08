@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useChatStore } from '../store/chat';
 import { Plus, Search, Pin, Trash2, Edit2 } from 'lucide-react';
 import { formatTokens } from '../lib/tokenEstimate';
@@ -18,6 +18,7 @@ export function Sidebar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   if (!sidebarOpen) return null;
 
@@ -36,7 +37,8 @@ export function Sidebar() {
   );
   const olderSessions = filteredSessions.filter(s => !s.pinned && s.updatedAt < weekAgo);
 
-  const handleStartEdit = (id: string, name: string) => {
+  const handleStartEdit = (id: string, name: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setEditingId(id);
     setEditingName(name);
   };
@@ -85,13 +87,11 @@ export function Sidebar() {
             >
               {editingId === session.id ? (
                 <input
+                  ref={inputRef}
                   type="text"
                   value={editingName}
                   onChange={e => setEditingName(e.target.value)}
-                  onBlur={() => {
-                    // 延迟执行，避免与 onClick 冲突
-                    setTimeout(() => handleSaveEdit(session.id), 100);
-                  }}
+                  onBlur={() => handleSaveEdit(session.id)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -102,6 +102,8 @@ export function Sidebar() {
                       handleCancelEdit();
                     }
                   }}
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                   className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-blue-500 dark:border-blue-400 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
@@ -133,10 +135,7 @@ export function Sidebar() {
                       <Pin className={`w-3 h-3 ${session.pinned ? 'fill-current' : ''}`} />
                     </button>
                     <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleStartEdit(session.id, session.name);
-                      }}
+                      onClick={e => handleStartEdit(session.id, session.name, e)}
                       className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-600 dark:text-gray-300"
                       title="重命名"
                     >
