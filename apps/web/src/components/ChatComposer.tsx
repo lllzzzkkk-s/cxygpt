@@ -1,4 +1,4 @@
-import React, { useState, useRef, KeyboardEvent } from 'react';
+import React, { useState, useRef, type KeyboardEvent } from 'react';
 import { Send, Square } from 'lucide-react';
 import { useChatStore } from '../store/chat';
 import { estimateTokens, getTokenColorClass } from '../lib/tokenEstimate';

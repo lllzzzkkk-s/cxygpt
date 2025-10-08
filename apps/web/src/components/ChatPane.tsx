@@ -19,6 +19,7 @@ export function ChatPane() {
 
     // 添加用户消息
     addMessage(currentSessionId, {
+      id: crypto.randomUUID(),
       role: 'user',
       content,
     });

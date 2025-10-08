@@ -26,7 +26,6 @@ export function Sidebar() {
   );
 
   // 分组：固定、今天、本周、更早
-  const now = Date.now();
   const today = new Date().setHours(0, 0, 0, 0);
   const weekAgo = today - 7 * 24 * 60 * 60 * 1000;
 

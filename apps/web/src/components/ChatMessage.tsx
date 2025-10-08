@@ -56,7 +56,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 remarkPlugins={[remarkGfm]}
                 components={{
                   ...getMarkdownComponents(),
-                  code: ({ inline, className, children }) => {
+                  code: ({
+                    inline,
+                    className,
+                    children,
+                  }: {
+                    inline?: boolean;
+                    className?: string;
+                    children?: React.ReactNode;
+                  }) => {
                     if (inline) {
                       return (
                         <code className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">
