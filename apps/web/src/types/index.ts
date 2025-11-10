@@ -73,3 +73,40 @@ export interface ErrorResponse {
     code?: number;
   };
 }
+
+// 知识库相关
+export type KnowledgeDocumentStatus = 'uploaded' | 'embedding' | 'ready' | 'error';
+
+export interface KnowledgeDocument {
+  id: string;
+  filename: string;
+  display_name?: string;
+  size_bytes: number;
+  status: KnowledgeDocumentStatus;
+  chunk_count?: number;
+  embedding_model?: string;
+  created_at: string;
+  updated_at: string;
+  error_message?: string | null;
+  metadata?: Record<string, string | number | boolean>;
+}
+
+export interface KnowledgeUploadResponse {
+  document: KnowledgeDocument;
+}
+
+// 认证
+export interface UserProfile {
+  id: string;
+  username: string;
+  email: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  created_at: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user: UserProfile;
+}

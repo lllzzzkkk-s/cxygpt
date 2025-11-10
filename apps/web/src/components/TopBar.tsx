@@ -1,10 +1,19 @@
 import React from 'react';
 import { useChatStore } from '../store/chat';
+import { useAuthStore } from '../store/auth';
 import { useHealthCheck } from '../hooks/useHealthCheck';
-import { Menu, Settings, Sun, Moon } from 'lucide-react';
+import { Menu, Settings, Sun, Moon, Library, LogOut } from 'lucide-react';
 
 export function TopBar() {
-  const { currentSessionId, sessions, toggleSidebar, toggleSettingsDrawer } = useChatStore();
+  const {
+    currentSessionId,
+    sessions,
+    toggleSidebar,
+    toggleSettingsDrawer,
+    toggleKnowledgeDrawer,
+  } = useChatStore();
+  const user = useAuthStore(state => state.user);
+  const logout = useAuthStore(state => state.logout);
   const healthy = useHealthCheck();
   const [darkMode, setDarkMode] = React.useState(false);
 
@@ -51,6 +60,13 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-2">
+        {user && (
+          <div className="hidden md:flex flex-col text-right mr-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user.username}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{user.email}</span>
+          </div>
+        )}
+
         <button
           onClick={toggleDarkMode}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
@@ -60,11 +76,27 @@ export function TopBar() {
         </button>
 
         <button
+          onClick={toggleKnowledgeDrawer}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
+          title="知识库管理"
+        >
+          <Library className="w-5 h-5" />
+        </button>
+
+        <button
           onClick={toggleSettingsDrawer}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
           title="设置"
         >
           <Settings className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={logout}
+          className="p-2 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-lg transition-colors text-red-600 dark:text-red-400"
+          title="退出登录"
+        >
+          <LogOut className="w-5 h-5" />
         </button>
       </div>
     </div>

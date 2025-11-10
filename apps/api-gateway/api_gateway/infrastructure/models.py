@@ -161,6 +161,41 @@ class DocumentModel(Base):
     )
 
 
+class KnowledgeDocumentStatus(str, enum.Enum):
+    """知识库文档状态"""
+
+    UPLOADED = "uploaded"
+    EMBEDDING = "embedding"
+    READY = "ready"
+    ERROR = "error"
+
+
+class KnowledgeDocumentModel(Base):
+    """知识库文档"""
+
+    __tablename__ = "knowledge_documents"
+
+    id = Column(UUIDBinary, primary_key=True, default=lambda: str(uuid.uuid4()))
+    owner_id = Column(UUIDBinary, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    filename = Column(String(255), nullable=False)
+    display_name = Column(String(255))
+    size_bytes = Column(Integer, nullable=False)
+    status = Column(
+        SQLEnum(KnowledgeDocumentStatus),
+        nullable=False,
+        default=KnowledgeDocumentStatus.UPLOADED,
+    )
+    chunk_count = Column(Integer)
+    embedding_model = Column(String(100))
+    storage_path = Column(String(500), nullable=False)
+    error_message = Column(Text)
+    metadata_json = Column("metadata", JSON)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    owner = relationship("UserModel", backref="knowledge_documents")
+
+
 class VectorIndexMetaModel(Base):
     """向量索引元数据表"""
 

@@ -49,6 +49,14 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
 
+    # 安全与认证
+    JWT_SECRET_KEY: str = "change-me"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 默认一天
+
+    # 知识库
+    KNOWLEDGE_STORAGE_ROOT: str = "storage/knowledge"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -56,14 +64,22 @@ class Settings(BaseSettings):
 
 def load_profiles() -> dict[str, Any]:
     """加载显存分档配置"""
-    config_path = Path(__file__).parents[3] / "configs" / "profiles.yaml"
+    base_path = Path(__file__).resolve()
 
-    if not config_path.exists():
-        return {}
+    candidate_paths: list[Path] = []
+    for parent in base_path.parents:
+        candidate_paths.append(parent / "configs" / "profiles.yaml")
 
-    with open(config_path, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-        return data.get("profiles", {})
+    # docker-compose.dev.yml 会把仓库 configs 挂载到 /configs
+    candidate_paths.append(Path("/configs/profiles.yaml"))
+
+    for config_path in candidate_paths:
+        if config_path.exists():
+            with open(config_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+                return data.get("profiles", {})
+
+    return {}
 
 
 def detect_gpu_memory() -> int | None:

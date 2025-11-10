@@ -14,6 +14,7 @@ interface ChatStore {
   // UI 状态
   sidebarOpen: boolean;
   settingsDrawerOpen: boolean;
+  knowledgeDrawerOpen: boolean;
   isStreaming: boolean;
 
   // Actions
@@ -32,8 +33,18 @@ interface ChatStore {
 
   toggleSidebar: () => void;
   toggleSettingsDrawer: () => void;
+  toggleKnowledgeDrawer: () => void;
   setIsStreaming: (streaming: boolean) => void;
+  resetState: () => void;
 }
+
+const defaultSettings: ChatSettings = {
+  temperature: 0.7,
+  top_p: 0.9,
+  max_tokens: 512,
+  systemPrompt: '',
+  enableLongDoc: true,
+};
 
 export const useChatStore = create<ChatStore>()(
   persist(
@@ -42,17 +53,12 @@ export const useChatStore = create<ChatStore>()(
       sessions: [],
       currentSessionId: null,
 
-      settings: {
-        temperature: 0.7,
-        top_p: 0.9,
-        max_tokens: 512,
-        systemPrompt: '',
-        enableLongDoc: true,
-      },
+      settings: { ...defaultSettings },
 
       limits: null,
       sidebarOpen: true,
       settingsDrawerOpen: false,
+      knowledgeDrawerOpen: false,
       isStreaming: false,
 
       // 会话操作
@@ -179,8 +185,25 @@ export const useChatStore = create<ChatStore>()(
         set(state => ({ settingsDrawerOpen: !state.settingsDrawerOpen }));
       },
 
+      toggleKnowledgeDrawer: () => {
+        set(state => ({ knowledgeDrawerOpen: !state.knowledgeDrawerOpen }));
+      },
+
       setIsStreaming: streaming => {
         set({ isStreaming: streaming });
+      },
+
+      resetState: () => {
+        set({
+          sessions: [],
+          currentSessionId: null,
+          settings: { ...defaultSettings },
+          limits: null,
+          sidebarOpen: true,
+          settingsDrawerOpen: false,
+          knowledgeDrawerOpen: false,
+          isStreaming: false,
+        });
       },
     }),
     {

@@ -2,9 +2,10 @@
 Pydantic 模型
 """
 
+from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ChatMessage(BaseModel):
@@ -105,3 +106,66 @@ class ErrorResponse(BaseModel):
             }
         ],
     )
+
+
+class Token(BaseModel):
+    """访问令牌响应"""
+
+    access_token: str
+    token_type: str = "bearer"
+
+
+class LoginRequest(BaseModel):
+    """登录请求体"""
+
+    username: str
+    password: str
+
+
+class UserProfile(BaseModel):
+    """用户信息"""
+
+    id: str
+    username: str
+    email: str
+    is_active: bool
+    is_superuser: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LoginResponse(Token):
+    """登录响应"""
+
+    user: UserProfile
+
+
+class KnowledgeDocument(BaseModel):
+    """知识库文档信息"""
+
+    id: str
+    filename: str
+    display_name: str | None = None
+    size_bytes: int
+    status: Literal["uploaded", "embedding", "ready", "error"]
+    chunk_count: int | None = None
+    embedding_model: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    error_message: str | None = None
+    metadata: dict[str, Any] | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class KnowledgeUploadResponse(BaseModel):
+    """上传文档响应"""
+
+    document: KnowledgeDocument
+
+
+class KnowledgeEmbeddingRequest(BaseModel):
+    """触发向量化请求"""
+
+    embedding_model: str | None = None

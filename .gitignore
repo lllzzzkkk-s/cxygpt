@@ -15,6 +15,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+!apps/web/src/lib/
+!apps/web/src/lib/**
 parts/
 sdist/
 var/
@@ -72,3 +74,8 @@ coverage.xml
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Project specific
+storage/
+.venv/
+apps/api-gateway/storage/

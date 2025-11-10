@@ -1,11 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { shallow } from 'zustand/shallow';
-import { useChatStore } from '../store/chat';
 import { Plus, Search, Pin, Trash2, Edit2 } from 'lucide-react';
+import { useChatStore } from '../store/chat';
 import { formatTokens } from '../lib/tokenEstimate';
+import type { ChatSession } from '../types';
 
-export function Sidebar() {
-  const sessions = useChatStore(state => state.sessions, shallow);
+type SessionGroupProps = {
+  title: string;
+  sessions: ChatSession[];
+};
+
+export function Sidebar(): React.ReactElement | null {
+  const sessions = useChatStore(state => state.sessions);
   const currentSessionId = useChatStore(state => state.currentSessionId);
   const createSession = useChatStore(state => state.createSession);
   const setCurrentSession = useChatStore(state => state.setCurrentSession);
@@ -69,14 +74,8 @@ export function Sidebar() {
     setEditingInitialName('');
   };
 
-  const SessionGroup = ({
-    title,
-    sessions,
-  }: {
-    title: string;
-    sessions: typeof filteredSessions;
-  }) => {
-    if (sessions.length === 0) return null;
+  const SessionGroup = ({ title, sessions: groupSessions }: SessionGroupProps) => {
+    if (groupSessions.length === 0) return null;
 
     return (
       <div className="mb-6">
@@ -84,7 +83,7 @@ export function Sidebar() {
           {title}
         </h3>
         <div className="space-y-1">
-          {sessions.map(session => (
+          {groupSessions.map(session => (
             <div
               key={session.id}
               className={`group relative px-3 py-2 rounded-lg cursor-pointer transition-colors ${
@@ -194,7 +193,7 @@ export function Sidebar() {
             placeholder="搜索对话..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
           />
         </div>
       </div>

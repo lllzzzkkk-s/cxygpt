@@ -10,11 +10,30 @@ const SYSTEM_PROMPT_TEMPLATES = [
   { label: '教学模式', value: '请用通俗易懂的方式解释，适合初学者理解。' },
 ];
 
+const TRACK_COLOR = 'rgba(148, 163, 184, 0.35)';
+const SLIDER_FILL_COLOR = '#2563eb';
+
+function getSliderStyle(value: number, min: number, max: number, fillColor = SLIDER_FILL_COLOR): React.CSSProperties {
+  const clamped = Math.min(Math.max(value, min), max);
+  const normalized = max === min ? 0 : (clamped - min) / (max - min);
+  const percent = Math.round(normalized * 100);
+
+  return {
+    background: `linear-gradient(90deg, ${fillColor} 0%, ${fillColor} ${percent}%, ${TRACK_COLOR} ${percent}%, ${TRACK_COLOR} 100%)`,
+    '--slider-fill': fillColor,
+  } as React.CSSProperties;
+}
+
 export function SettingsDrawer() {
   const { settingsDrawerOpen, toggleSettingsDrawer, settings, updateSettings, limits } =
     useChatStore();
 
   if (!settingsDrawerOpen) return null;
+
+  const maxOutputTokens = limits?.max_output_tokens || 512;
+  const temperatureStyle = getSliderStyle(settings.temperature, 0, 2);
+  const topPStyle = getSliderStyle(settings.top_p, 0, 1);
+  const maxTokenStyle = getSliderStyle(settings.max_tokens, 64, maxOutputTokens);
 
   const handleTemplateChange = (template: string) => {
     updateSettings({ systemPrompt: template });
@@ -67,7 +86,8 @@ export function SettingsDrawer() {
               step="0.05"
               value={settings.temperature}
               onChange={e => updateSettings({ temperature: parseFloat(e.target.value) })}
-              className="w-full"
+              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-transparent"
+              style={temperatureStyle}
             />
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               控制输出的随机性（0=确定性，2=高随机）
@@ -86,7 +106,8 @@ export function SettingsDrawer() {
               step="0.05"
               value={settings.top_p}
               onChange={e => updateSettings({ top_p: parseFloat(e.target.value) })}
-              className="w-full"
+              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-transparent"
+              style={topPStyle}
             />
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">核采样概率阈值</div>
           </div>
@@ -99,11 +120,12 @@ export function SettingsDrawer() {
             <input
               type="range"
               min="64"
-              max={limits?.max_output_tokens || 512}
+              max={maxOutputTokens}
               step="32"
               value={settings.max_tokens}
               onChange={e => updateSettings({ max_tokens: parseInt(e.target.value) })}
-              className="w-full"
+              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-transparent"
+              style={maxTokenStyle}
             />
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               最大输出 token 数（上限：{limits?.max_output_tokens || 512}）

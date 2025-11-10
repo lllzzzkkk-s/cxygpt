@@ -8,7 +8,7 @@ import uuid
 from collections.abc import AsyncGenerator
 
 import httpx
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sse_starlette.sse import EventSourceResponse
 
 from api_gateway.config import settings
@@ -24,6 +24,7 @@ from api_gateway.models.schemas import (
 )
 from api_gateway.utils.logger import request_id_var, setup_logger
 from api_gateway.utils.tokens import estimate_messages_tokens
+from api_gateway.presentation.dependencies import get_current_user
 
 router = APIRouter(tags=["Chat"])
 logger = setup_logger(__name__, settings.LOG_LEVEL, settings.LOG_FORMAT)
@@ -62,11 +63,18 @@ data: [DONE]
         503: {"model": ErrorResponse, "description": "系统繁忙"},
     },
 )
-async def chat_completions(request: Request, req: ChatCompletionRequest):
+async def chat_completions(
+    request: Request,
+    req: ChatCompletionRequest,
+    current_user=Depends(get_current_user),
+):
     """聊天补全"""
     # 设置请求 ID
     req_id = str(uuid.uuid4())
     request_id_var.set(req_id)
+
+    # 记录请求来源用户
+    request.state.user_id = current_user.id
 
     time.time()
 

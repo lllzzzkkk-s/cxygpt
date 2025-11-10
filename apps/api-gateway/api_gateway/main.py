@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from api_gateway.config import get_profile_name, settings
-from api_gateway.routes import chat, system
+from api_gateway.routes import auth, chat, knowledge, system
 from api_gateway.utils.logger import request_id_var, setup_logger
 
 # 设置日志
@@ -86,12 +86,20 @@ OpenAI 兼容的本地大模型 API 网关。
 )
 
 # CORS
+# 生产环境应限制来源
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 生产环境应限制
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
@@ -109,6 +117,8 @@ async def add_request_id(request: Request, call_next):
 # 注册路由
 app.include_router(system.router)
 app.include_router(chat.router)
+app.include_router(auth.router)
+app.include_router(knowledge.router)
 
 
 # 全局异常处理
