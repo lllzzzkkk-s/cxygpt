@@ -26,30 +26,42 @@ export class APIError extends Error {
     }
 
     switch (this.status) {
+      case 401:
+        return '认证失败，请重新登录。';
+      case 403:
+        return '没有权限访问该资源。';
+      case 404:
+        return '请求的资源不存在。';
       case 413:
         return '输入过长，请缩短问题或切换更高档位。';
       case 429:
         return '请求过多，请稍后重试。';
+      case 500:
+        return '服务器内部错误，请稍后重试。';
+      case 502:
+        return '网关错误，请检查后端服务是否运行。';
       case 503:
         return '系统繁忙，请稍后重试。';
+      case 0:
+        return '无法连接到服务器，请检查网络连接和后端服务状态。';
       default:
-        return '服务暂时不可用，请稍后再试。';
+        return `服务暂时不可用（错误码: ${this.status}），请稍后再试。`;
     }
   }
 }
 
-async function parseJson<T>(response: Response): Promise<T> {
-  const text = await response.text();
-  if (!text) {
-    throw new APIError(response.status, 'Empty response body');
-  }
+// async function parseJson<T>(response: Response): Promise<T> {
+//   const text = await response.text();
+//   if (!text) {
+//     throw new APIError(response.status, 'Empty response body');
+//   }
 
-  try {
-    return JSON.parse(text) as T;
-  } catch (err) {
-    throw new APIError(response.status, 'Invalid JSON response');
-  }
-}
+//   try {
+//     return JSON.parse(text) as T;
+//   } catch (err) {
+//     throw new APIError(response.status, 'Invalid JSON response');
+//   }
+// }
 
 function buildHeaders(extra?: HeadersInit): HeadersInit {
   const base: Record<string, string> = {
@@ -96,6 +108,12 @@ async function request<T = unknown>(path: string, init?: RequestInit): Promise<T
       /* ignore JSON parse errors */
     }
 
+    // 401 错误：token 无效或过期，自动登出
+    if (response.status === 401) {
+      const { useAuthStore } = await import('../store/auth');
+      useAuthStore.getState().logout();
+    }
+
     throw new APIError(
       response.status,
       payload?.error?.message ?? `Request failed with status ${response.status}`,
@@ -129,6 +147,13 @@ async function* streamCompletions(
     } catch {
       /* ignore */
     }
+
+    // 401 错误：token 无效或过期，自动登出
+    if (response.status === 401) {
+      const { useAuthStore } = await import('../store/auth');
+      useAuthStore.getState().logout();
+    }
+
     throw new APIError(
       response.status,
       payload?.error?.message ?? `Streaming request failed (${response.status})`,

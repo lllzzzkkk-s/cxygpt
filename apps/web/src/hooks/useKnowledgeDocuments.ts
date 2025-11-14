@@ -3,10 +3,15 @@ import type { KnowledgeDocument } from '../types';
 import { knowledgeClient } from '../lib/knowledge';
 import { APIError } from '../lib/openai';
 
-function mergeDocuments(list: KnowledgeDocument[], incoming: KnowledgeDocument): KnowledgeDocument[] {
+function mergeDocuments(
+  list: KnowledgeDocument[],
+  incoming: KnowledgeDocument
+): KnowledgeDocument[] {
   const index = list.findIndex(doc => doc.id === incoming.id);
   if (index === -1) {
-    return [...list, incoming].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    return [...list, incoming].sort(
+      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    );
   }
 
   const copy = [...list];
@@ -16,13 +21,16 @@ function mergeDocuments(list: KnowledgeDocument[], incoming: KnowledgeDocument):
 
 function formatError(error: unknown): string {
   if (error instanceof APIError) {
+    console.log('[Knowledge] APIError:', { status: error.status, message: error.message });
     return error.getUserMessage();
   }
 
   if (error instanceof Error && error.message) {
+    console.log('[Knowledge] Error:', error.message);
     return error.message;
   }
 
+  console.log('[Knowledge] Unknown error:', error);
   return '操作失败，请稍后重试。';
 }
 
@@ -70,7 +78,8 @@ export function useKnowledgeDocuments(enabled: boolean): KnowledgeDocumentsState
     if (!enabled) return;
     setLoading(true);
     void refresh();
-  }, [enabled, refresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]); // 只依赖 enabled，避免循环依赖
 
   const markEmbedding = useCallback((documentId: string, active: boolean) => {
     setEmbeddingIds(prev => {

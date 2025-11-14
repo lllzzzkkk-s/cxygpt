@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Upload, RefreshCw, Loader2, Database, Trash2, Sparkles, FileText } from 'lucide-react';
 import { useChatStore } from '../store/chat';
+import { useAuthStore } from '../store/auth';
 import { useKnowledgeDocuments } from '../hooks/useKnowledgeDocuments';
 import type { KnowledgeDocument } from '../types';
 
@@ -32,22 +33,33 @@ function formatTimestamp(timestamp: string): string {
 function getStatusPill(status: KnowledgeDocument['status']): { label: string; className: string } {
   switch (status) {
     case 'ready':
-      return { label: '已就绪', className: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300' };
+      return {
+        label: '已就绪',
+        className: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
+      };
     case 'embedding':
-      return { label: '向量生成中', className: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300' };
+      return {
+        label: '向量生成中',
+        className: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+      };
     case 'uploaded':
-      return { label: '待处理', className: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' };
+      return {
+        label: '待处理',
+        className: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
+      };
     case 'error':
     default:
-      return { label: '出错', className: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300' };
+      return {
+        label: '出错',
+        className: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+      };
   }
 }
 
 export function KnowledgeDrawer(): React.ReactElement | null {
-  const {
-    knowledgeDrawerOpen,
-    toggleKnowledgeDrawer,
-  } = useChatStore();
+  const { knowledgeDrawerOpen, toggleKnowledgeDrawer } = useChatStore();
+
+  const user = useAuthStore(state => state.user);
 
   const {
     documents,
@@ -61,7 +73,7 @@ export function KnowledgeDrawer(): React.ReactElement | null {
     uploadDocuments,
     triggerEmbedding,
     removeDocument,
-  } = useKnowledgeDocuments(knowledgeDrawerOpen);
+  } = useKnowledgeDocuments(knowledgeDrawerOpen && !!user);
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -125,7 +137,11 @@ export function KnowledgeDrawer(): React.ReactElement | null {
               className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               title="刷新列表"
             >
-              {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              {refreshing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
             </button>
 
             <button
@@ -215,7 +231,8 @@ export function KnowledgeDrawer(): React.ReactElement | null {
               ) : (
                 documents.map(document => {
                   const { label, className } = getStatusPill(document.status);
-                  const isEmbedding = embeddingIds.has(document.id) || document.status === 'embedding';
+                  const isEmbedding =
+                    embeddingIds.has(document.id) || document.status === 'embedding';
                   const isDeleting = deletingIds.has(document.id);
 
                   return (
@@ -229,7 +246,9 @@ export function KnowledgeDrawer(): React.ReactElement | null {
                             <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {document.display_name ?? document.filename}
                             </h4>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${className}`}>
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${className}`}
+                            >
                               {isEmbedding && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
                               {label}
                             </span>
@@ -277,7 +296,11 @@ export function KnowledgeDrawer(): React.ReactElement | null {
                             disabled={isDeleting}
                             className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10 disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                            {isDeleting ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3 h-3" />
+                            )}
                             删除
                           </button>
                         </div>

@@ -29,6 +29,19 @@ async function handleResponse<T>(response: Response, parseBody = true): Promise<
       /* ignore JSON errors */
     }
 
+    console.log('[Knowledge] Request failed:', {
+      status: response.status,
+      message,
+      url: response.url,
+    });
+
+    // 401 错误：token 无效或过期，自动登出
+    if (response.status === 401) {
+      console.log('[Knowledge] 401 error detected, logging out...');
+      const { useAuthStore } = await import('../store/auth');
+      useAuthStore.getState().logout();
+    }
+
     throw new APIError(response.status, message);
   }
 
@@ -54,7 +67,10 @@ class KnowledgeClient {
     return handleResponse<KnowledgeDocument[]>(response);
   }
 
-  async uploadDocument(file: File, options: UploadDocumentOptions = {}): Promise<KnowledgeDocument> {
+  async uploadDocument(
+    file: File,
+    options: UploadDocumentOptions = {}
+  ): Promise<KnowledgeDocument> {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -98,6 +114,10 @@ class KnowledgeClient {
   private buildAuthHeaders(options?: { includeJson?: boolean }): HeadersInit {
     const headers: Record<string, string> = {};
     const token = getAccessToken();
+    console.log(
+      '[Knowledge] Building auth headers, token:',
+      token ? `${token.substring(0, 20)}...` : 'null'
+    );
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }

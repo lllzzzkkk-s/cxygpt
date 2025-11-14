@@ -12,15 +12,15 @@ import { Loader2 } from 'lucide-react';
 import './index.css';
 
 function App() {
-  const { limits } = useLimits();
-  const setLimits = useChatStore(state => state.setLimits);
-  const sessions = useChatStore(state => state.sessions);
-  const createSession = useChatStore(state => state.createSession);
-
   const accessToken = useAuthStore(state => state.accessToken);
   const user = useAuthStore(state => state.user);
   const refreshProfile = useAuthStore(state => state.refreshProfile);
   const authLoading = useAuthStore(state => state.loading);
+
+  const { limits } = useLimits(!!user);
+  const setLimits = useChatStore(state => state.setLimits);
+  const sessions = useChatStore(state => state.sessions);
+  const createSession = useChatStore(state => state.createSession);
 
   useEffect(() => {
     if (accessToken && !user) {
